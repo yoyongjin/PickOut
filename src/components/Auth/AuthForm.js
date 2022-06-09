@@ -5,7 +5,9 @@ import classes from "./AuthForm.module.css";
 const AuthForm = () => {
   const emailInputRef = useRef();
   const passwordInputRef = useRef();
+
   const [isLogin, setIsLogin] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   const switchAuthModeHandler = () => {
     setIsLogin((prevState) => !prevState);
@@ -19,6 +21,7 @@ const AuthForm = () => {
 
     // Add validation
 
+    setIsLoading(true);
     if (isLogin) {
     } else {
       fetch(
@@ -35,11 +38,16 @@ const AuthForm = () => {
           },
         }
       ).then((res) => {
+        setIsLoading(false);
         if (res.ok) {
           //...
         } else {
           return res.json().then((data) => {
-            // error modal 사용자에게 보여주기
+            let errorMessage = "Authentication failed!";
+            if (data && data.error && data.error.message) {
+              errorMessage = data.error.message;
+            }
+            alert(errorMessage);
             console.log(data);
           });
         }
@@ -65,7 +73,10 @@ const AuthForm = () => {
           />
         </div>
         <div className={classes.actions}>
-          <button>{isLogin ? "Login" : "Create Account"}</button>
+          {!isLoading && (
+            <button>{isLogin ? "Login" : "Create Account"}</button>
+          )}
+          {isLoading && <p>Sending requests...</p>}
           <button
             type="button"
             className={classes.toggle}
